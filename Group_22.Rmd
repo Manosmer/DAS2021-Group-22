@@ -30,5 +30,11 @@ More specifically, we are interested in discovering the most important features 
 For this purpose, we consider various numerical and graphical summaries, followed by the use of an appropriate generalised linear model in order to assess the relationship between the available variables and the 1000 Suadi Riyals threshold related to the price.
 
 
+```{r}
+# reading data
+ikeadata <- read.csv("./dataset22.csv", row.names = 1)
 
+# split data based on price using the 1000 threshold
+ikeadata$priceCat <- ikeadata$price > 1000
+```
 
