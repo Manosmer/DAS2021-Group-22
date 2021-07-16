@@ -10,7 +10,7 @@ fig_caption: yes
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, message = FALSE)
+knitr::opts_chunk$set(echo = FALSE, message = FALSE)
 ```
 
 ```{r libraries}
@@ -24,19 +24,16 @@ library(skimr)
 
 The objective of this report is to identify the most influential factors that explain the price of a furnishing product sold by IKEA. To this end, a data set from IKEA Saudi Arabia was collected, containing measurements about 500 items of furniture. The variables considered are:
 
-* `item_id` – Unique item ID for item of furniture
-* `category` – The furniture category the item belongs to
-* `price` – The current price in Saudi Riyals (as recorded on 20/04/2020)
-* `sellable_online` – Is the item available to purchase online?
-* `other_colors` – Is the item available in other colours
-* `depth` – Depth of the item in cm
-* `height` – Height of the item in cm
+* `item_id` – unique product ID
+* `category` – the furniture category the item belongs to
+* `price` – the current price in Saudi Riyals (as recorded on 20/04/2020)
+* `sellable_online` – a binary variable to indicate whether the item is available to purchase online
+* `other_colors` – a binary variable to indicate whether the item is available in other colours
+* `depth` – depth of the item in cm
+* `height` – height of the item in cm
 * `width` – width of the item in cm
 
-More specifically, we are interested in discovering the most important features out of all available that dictate whether a product is more expensive than 1000 Saudi Riyals.
-
-For this purpose, we consider various numerical and graphical summaries, followed by the use of an appropriate generalised linear model in order to assess the relationship between the available variables and the 1000 Suadi Riyals threshold related to the price.
-
+More specifically, we are interested in discovering the most important features out of all available that dictate whether a product is more expensive than 1000 Saudi Riyals. For that reason, we create one more binary variable, `priceCat`, to indicate whether a product costs more than 1000 Saudi Riyals.
 
 ```{r}
 # reading data
@@ -46,16 +43,39 @@ ikeadata <- read.csv("./dataset22.csv", row.names = 1)
 ikeadata$priceCat <- ikeadata$price > 1000
 ```
 
+Throughout the report, we consider various numerical and graphical summaries, followed by the use of an appropriate generalised linear model in order to assess the relationship between the available variables and the 1000 Suadi Riyals threshold related to the price.
+
+
+
 # Exploratory Data Analysis
 
-Before conducting any formal data analysis using statistical models, it is useful to explore our data and the relationships between them using numerical and graphical summaries. The following table contains summary statistics for the variables of our data set except for the `item_id` variable as it constitutes an identification variable that does not hold any actual information about the products.
+Before conducting any formal data analysis using statistical models, it is useful to explore our data and the relationships between them using numerical and graphical summaries. The following table contains summary statistics for the variables of our data set except for the `item_id` variable as it constitutes an identification variable that does not hold any useful information about the products.
 
 ```{r}
 ikeadata$item_id <- NULL
+ikeadata$category <- as.factor(ikeadata$category)
+ikeadata$other_colors <- ikeadata$other_colors == "Yes"
 
-ikeadata$
 
 ikeadata %>%
   skim_without_charts()
 ```
+
+There are several interesting findings from the summary statistics. 
+
+Starting from the top of the table, we observe that we have 4 categorical variables (including the newly-created price based one) and 4 numeric variables. 
+
+* For the furniture category, we observe no missing values and 17 different categories, while a more thorough view of the different categories follows below. 
+
+* The amount of products sold online in our data set completely dominates the amount of the ones that are not, accounting for the 98% of the data set (492 products in total).
+
+* The products available in other colours account for just the 40% of the total amount of products observed. This means that there are only 198 products available in other colours, while 302 products are sold in one colour.
+
+* There are only 183 items priced over 1000 Saudi Riyals, which is roughly one third of the total amount of products observed.
+
+* When the price is considered as a continuous variable, its variance is significantly larger than the rest of the numeric variables, with prices as low as 5 and as high as 9585 Saudi Riyals. However, such a difference can be justified by the different measurement units in which these variables are measured.
+
+* Regarding the depth of the items, it is apparent that almost half of the observed items are lacking a depth measurement (213 items), which is a considerable amount of missing information. Furthermore, comparing it to height and width, the mean value of depth is about half of the corresponding means of the rest of the features. Its standard deviation is about half the standard deviation of height. Moreover, its 50% central sample distribution appears to be lower than that of the others, suggesting that depth is smaller that height and width, in general. Those observations are important since these 3 variables are measured in the same units.
+
+* When it comes to height and width, there are 135 and 77 missing values, respectively. In general, their summary statistics do not present a significant difference. The only two exceptions are their variances and their maximum values. The variance of height is 61.98, while the variance of width is equal to 75.73. Height's maximum value is 321 cm, while width's maximum value is 387 cm.
 
