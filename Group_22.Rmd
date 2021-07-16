@@ -11,3 +11,30 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r libraries}
 ```
+
+# Introduction
+
+The objective of this report is to identify the most influential factors that explain the price of a furnishing product sold by IKEA. To this end, a data set from IKEA Saudi Arabia was collected, containing measurements about 500 items of furniture. The variables considered are:
+
+* `item_id` – Unique item ID for item of furniture
+* `category` – The furniture category the item belongs to
+* `price` – The current price in Saudi Riyals (as recorded on 20/04/2020)
+* `sellable_online` – Is the item available to purchase online?
+* `other_colors` – Is the item available in other colours
+* `depth` – Depth of the item in cm
+* `height` – Height of the item in cm
+* `width` – width of the item in cm
+
+More specifically, we are interested in discovering the most important features out of all available that dictate whether a product is more expensive than 1000 Saudi Riyals.
+
+For this purpose, we consider various numerical and graphical summaries, followed by the use of an appropriate generalised linear model in order to assess the relationship between the available variables and the 1000 Suadi Riyals threshold related to the price.
+
+
+```{r}
+# reading data
+ikeadata <- read.csv("./dataset22.csv", row.names = 1)
+
+# split data based on price using the 1000 threshold
+ikeadata$priceCat <- ikeadata$price > 1000
+```
+
