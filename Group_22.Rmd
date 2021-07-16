@@ -2,12 +2,43 @@
 title: "DAS2021 - Project 2"
 author: "Group 22"
 date: "11/7/2021"
-output: pdf_document
+output:
+  pdf_document:
+    latex_engine: xelatex
+    number_sections: no
+fig_caption: yes
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, message = FALSE)
 ```
 
 ```{r libraries}
+library(moderndive)
+library(knitr)
+library(tidyverse)
+library(skimr)
 ```
+
+
+
+
+
+
+
+# Exploratory Data Analysis
+
+Before conducting any formal data analysis using statistical models, it is useful to explore our data and the relationships between them using numerical and graphical summaries. The following table contains summary statistics for the variables of our data set except for the `item_id` variable as it constitutes an identification variable that does not hold any actual information about the products.
+
+```{r}
+ikeadata <- read.csv("./dataset22.csv", row.names = 1)
+
+ikeadata$item_id <- NULL
+
+ikeadata$
+
+ikeadata %>%
+  skim_without_charts()
+```
+
+
