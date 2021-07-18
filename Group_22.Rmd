@@ -5,7 +5,7 @@ date: "11/7/2021"
 output:
   pdf_document:
     latex_engine: xelatex
-    number_sections: no
+    number_sections: yes
 fig_caption: yes
 ---
 
@@ -79,3 +79,95 @@ Starting from the top of the table, we observe that we have 4 categorical variab
 
 * When it comes to height and width, there are 135 and 77 missing values, respectively. In general, their summary statistics do not present a significant difference. The only two exceptions are their variances and their maximum values. The variance of height is 61.98, while the variance of width is equal to 75.73. Height's maximum value is 321 cm, while width's maximum value is 387 cm.
 
+
+## Missing values
+
+Due to the significant amount of missing information, it is important to address the issue of missing values before proceeding with our data analysis.
+
+Our first step is to remove observations with 2 or more missing values. Such observations can be considered as items with a significant loss of information to the point that they cannot be useful for analysis.
+
+Additionally, in order to avoid removing more information from the data set, we attempt to replace the missing values of the remaining observations. To this end, we calculate the mean of the missing variable using only those observations that belong to the same furniture category as the observation of interest. Essentially, this is equivalent to fitting a linear regression model with the variable of interest as the response and the `category` variable as the predictor and predicting the missing value using the observation's furniture category.
+
+```{r}
+# removing observations with >= 2 NAs
+ikeadata <- ikeadata[!apply(is.na(ikeadata), 1, sum) >= 2,]
+
+# replace remaining NAs with means
+for (i in 1:nrow(ikeadata)) {
+  if(is.na(ikeadata$depth[i])){
+    ikeadata$depth[i]<- mean(ikeadata$depth[ikeadata$category == ikeadata[i, "category"]], na.rm = TRUE)
+  }
+  if(is.na(ikeadata$height[i])){
+    ikeadata$height[i]<- mean(ikeadata$height[ikeadata$category == ikeadata[i, "category"]], na.rm = TRUE)
+  }
+  if(is.na(ikeadata$width[i])){
+    ikeadata$width[i]<- mean(ikeadata$width[ikeadata$category == ikeadata[i, "category"]], na.rm = TRUE)
+  }
+}
+
+
+ikeadata %>%
+  skim_without_charts()
+```
+
+After cleaning the data, the overall results are similar to the ones we had before. However, we point out some key differences and similarities:
+
+* The resulting data set now contains 383 products. This corresponds to the removal of 117 products as these contained 2 or more missing values.
+
+* There is a different ordering of levels when we consider the descending order of `category`'s levels by count. "Tables & desks" was the dominating category before cleaning the data. However, many observations under this category contained 2 or more missing values.
+
+* For the `sellable_online` categorical variable, we observe an even larger proportion of items sold online, accounting for the 99% of the total amount of products.
+
+* For `depth`, `height` and `width`. we observe the same dissimilarities along with slightly wider IQRs for each variable. Also, there is a decrease in the variance of `depth` and an increased variance for `width`.
+
+* Finally, the mean and median values of `price` are increased when considering it as a continuous variable. Also, its variance increased significantly.
+
+
+## Exploring relationships with respect to the price category
+
+* sellable online
+
+```{r}
+ggplot(ikeadata, 
+       mapping = aes(x = sellable_online, fill = priceCat)) +
+  geom_bar(position = "dodge")
+```
+
+* other_color
+```{r}
+
+t(apply(table(ikeadata$other_colors, ikeadata$priceCat), 2, function(x){x/sum(x)}))
+
+ggplot(ikeadata, 
+       mapping = aes(x = priceCat, group = other_colors)) +
+  geom_bar(aes(y = ..prop.., fill = other_colors))
+```
+
+
+* price cont, height, width, depth
+
+```{r}
+round(cor(ikeadata[c("price", "depth", 
+                     "height", "width")]),3) %>%
+  kable
+```
+
+* price categorical, height, width, depth
+
+```{r}
+ggplot(ikeadata,
+       mapping = aes(x = priceCat, y = height)) + 
+  geom_boxplot()
+```
+
+```{r}
+ggplot(ikeadata,
+       mapping = aes(x = priceCat, y = depth)) + 
+  geom_boxplot()
+```
+
+```{r}
+ggplot(ikeadata,
+       mapping = aes(x = priceCat, y = width)) + 
+  geom_boxplot()
+```
