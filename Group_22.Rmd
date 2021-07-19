@@ -1,6 +1,6 @@
 ---
 title: "DAS2021 - Project 2"
-author: "Group 22"
+author: "Group 22 - Shuang Wu, SHANSHAN LU, Linfeng Guo, Emmanouil Mertzianis, WAN XIE"
 date: "11/7/2021"
 output:
   pdf_document:
@@ -22,7 +22,7 @@ library(skimr)
 
 # Introduction
 
-The objective of this report is to identify the most influential factors that explain the price of a furnishing product sold by IKEA. To this end, a data set from IKEA Saudi Arabia was collected, containing measurements about 500 items of furniture. The variables considered are:
+The objective of this report is to identify the most influential attributes that explain the price of a furnishing product sold by IKEA. To this end, a data set from IKEA Saudi Arabia was collected, containing measurements about 500 items of furniture. The variables considered are:
 
 * `item_id` – unique product ID
 * `category` – the furniture category the item belongs to
@@ -33,14 +33,14 @@ The objective of this report is to identify the most influential factors that ex
 * `height` – height of the item in cm
 * `width` – width of the item in cm
 
-More specifically, we are interested in discovering the most important features out of all available that dictate whether a product is more expensive than 1000 Saudi Riyals. For that reason, we create one more binary variable, `priceCat`, to indicate whether a product costs more than 1000 Saudi Riyals.
+More specifically, we are interested in discovering the most important features out of all available that dictate whether a product is more expensive than 1000 Saudi Riyals. For that reason, we create one more binary variable, `priceMoreThan1000`, to indicate whether a product costs more than 1000 Saudi Riyals.
 
 ```{r}
 # reading data
 ikeadata <- read.csv("./dataset22.csv", row.names = 1)
 
 # split data based on price using the 1000 threshold
-ikeadata$priceCat <- ikeadata$price > 1000
+ikeadata$priceMoreThan1000 <- ikeadata$price > 1000
 ```
 
 Throughout the report, we consider various numerical and graphical summaries, followed by the use of an appropriate generalised linear model in order to assess the relationship between the available variables and the 1000 Suadi Riyals threshold related to the price.
@@ -125,49 +125,98 @@ After cleaning the data, the overall results are similar to the ones we had befo
 
 ## Exploring relationships with respect to the price category
 
-* sellable online
+The purpose of the report is to identify the most influential variables with respect to the price category of a product. For this purpose, it is useful to explore the relationships between the available variables and the price category.
+
+
+### Sellable_online
+
+First, we focus on the relationship between the `sellable_online` binary variable and `priceMoreThan1000`. The table of proportions for each `price category` within each `sellable_online` category computed below shows that all the products that are not available for online purchase cost 1000 Saudi Riyals or less, while products available online present a 36/64 split with inexpensive products still dominating. 
+
+However, from the barplot of counts along with our findings from the summary statistics it is shown that the amount of products not available for online purchase are just three in our data set. That's an extremely small amount of data as 99% or 380 of the products are indeed available for online purchase. In other words, we do not have a sufficient sample of products that are _unavailable_ online in order to analyse the sample distribution of the price category for them. Therefore, under these data, we consider the `sellable_online` variable not significant for the analysis as all but 3 products are available online. It is important to point out that this issue was also present prior to cleaning the data as the original data set contained only 8 observations with `sellable_online` equal to `FALSE` out of 500 products in total.
 
 ```{r}
-ggplot(ikeadata, 
-       mapping = aes(x = sellable_online, fill = priceCat)) +
-  geom_bar(position = "dodge")
+# table of percentages of price category for each sellable_online category
+soVsPrice <- t(apply(table(ikeadata$sellable_online, ikeadata$priceMoreThan1000), 1, function(x){x/sum(x)}))
+
+colnames(soVsPrice) <- c("<=1000", ">1000")
+rownames(soVsPrice) <- c("not online", "online")
+
+soVsPrice %>% kable(caption = "\\label{table:sP} Percentages of price category within each level of sellable_online.")
 ```
 
-* other_color
-```{r}
 
-t(apply(table(ikeadata$other_colors, ikeadata$priceCat), 2, function(x){x/sum(x)}))
-
+```{r, fig.align='center', out.width="70%"}
 ggplot(ikeadata, 
-       mapping = aes(x = priceCat, group = other_colors)) +
-  geom_bar(aes(y = ..prop.., fill = other_colors))
+       mapping = aes(x = sellable_online, fill = priceMoreThan1000)) +
+  geom_bar(position = "dodge") +
+  labs(x = "Available for online purchase",
+       y = "Count")
 ```
 
 
-* price cont, height, width, depth
+### Other_colors
+
+The barplot of the price category with respect to the `other_colors` binary variable and the table of the corresponding proportions indicate that the proportion of products available in multiple colours priced over 1000 SAR is larger than that of the products in one colour. However, these proportions are very similar. Furthermore, the proportion of single coloured items priced 1000 SAR or below is greater than those priced over 1000 SAR. We observe the same pattern for the category of multiple colours as well.
 
 ```{r}
+# table of percentages of price category for each sellable_online category
+coloursVsPrice <- t(apply(table(ikeadata$other_colors, ikeadata$priceMoreThan1000), 1, function(x){x/sum(x)}))
+
+colnames(coloursVsPrice) <- c("<=1000", ">1000")
+rownames(coloursVsPrice) <- c("not in other colours", "in other colours")
+
+coloursVsPrice %>% kable(caption = "\\label{table:colP} Percentages of price category within each level of other_colors.")
+```
+
+
+```{r, fig.align='center', out.width="70%"}
+ggplot(data = ikeadata, aes(x = priceMoreThan1000, 
+                            group = other_colors)) +
+geom_bar(aes(y = ..prop.., fill = other_colors), stat = "count", position = "dodge") +
+labs(x = "Price over 1000 SAR", y = "Proportion")
+```
+
+
+### Height, width, depth
+
+Before considering the price as a binary variable, it would be useful to explore its relationship to the other continuous variables.
+
+One suitable summary statistic to assess the linearity of the relationships between continuous variables is the correlation coefficient. The correlation table below suggests a strong positive linear relationship between `price` and `width`, while there is a moderately strong positive linear relationship between price and depth. Additionally, the correlation between price and height is equal to 0.225, suggesting a very weak positive linear relationship.
+
+Finally, we observe that there is weak to moderate positive correlation between width and depth or height and that there is almost no correlation between height and depth. 
+
+```{r}
+# correlation table
 round(cor(ikeadata[c("price", "depth", 
                      "height", "width")]),3) %>%
-  kable
+  kable(caption = "\\label{cor:price} Correlation coefficients between price, width, height and depth.")
 ```
 
-* price categorical, height, width, depth
 
-```{r}
+We are now considering price as a binary variable.
+
+The boxplot of the sample distribution of height by the price category shows that the median value of height for items priced over 1000 SAR is greater than that of less expensive items, suggesting that the items priced over 1000 SAR have larger height, in general. Furthermore, the boxplot reports a lot of high outliers for the distribution of less expensive products, while the variance of height for expensive products is significantly larger.
+
+```{r, fig.align='center', out.width="60%"}
 ggplot(ikeadata,
-       mapping = aes(x = priceCat, y = height)) + 
+       mapping = aes(x = priceMoreThan1000, y = height)) + 
   geom_boxplot()
 ```
 
-```{r}
+
+The boxplot of depth by price category presents similar results. Items that cost more than 1000 SAR have in general more depth, while the variance of depth for those items appears to be significantly larger than that of the lower price items. Additionally, we observe several low and high outliers for the distribution of `priceMoreThan1000 = FALSE`, while there are some high outliers for the distribution of `priceMoreThan1000 = TRUE`.
+
+```{r, fig.align='center', out.width="60%"}
 ggplot(ikeadata,
-       mapping = aes(x = priceCat, y = depth)) + 
+       mapping = aes(x = priceMoreThan1000, y = depth)) + 
   geom_boxplot()
 ```
 
-```{r}
+
+Finally, we observe the largest separation in medians for the variable of width. Again, items priced over 1000 SAR are, in general, wider than those priced at 1000 or less. However, in the case of depth, the IQR boxes do not overlap at all as opposed to the previous 2 continuous variables. We observe several high outliers for the case of items which cost 1000 SAR or less, while the variance for items above 1000 SAR is considerably larger. 
+
+```{r, fig.align='center', out.width="60%"}
 ggplot(ikeadata,
-       mapping = aes(x = priceCat, y = width)) + 
+       mapping = aes(x = priceMoreThan1000, y = width)) + 
   geom_boxplot()
 ```
