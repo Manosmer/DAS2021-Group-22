@@ -177,6 +177,22 @@ labs(x = "Price over 1000 SAR", y = "Proportion")
 ```
 
 
+### Furniture category
+
+The barplot of the price category by furniture category shows that for the most of the furniture categories the proportion of items priced at 1000 SAR or lower is larger than those priced over 1000 SAR. Especially, for the categories of "Bar furniture", "Caf.. furniture", "Children's furniture", "Sideboards, buffets & console tables" and "Trolleys", we observe that all of their products are priced at most 1000 SAR. 
+
+Finally, the only categories with larger percentages for items priced over 1000 SAR are "Beds", "Room dividers", "Sofas & armchairs"  and "Wardrobes".
+
+
+```{r, fig.align='center', out.width="80%", warning = FALSE}
+ggplot(data = ikeadata, aes(x = priceMoreThan1000, 
+                            group = category)) +
+geom_bar(aes(y = ..prop.., fill = category), stat = "count", position = "dodge") +
+labs(x = "Price over 1000 SAR", y = "Proportion")
+```
+
+
+
 ### Height, width, depth
 
 Before considering the price as a binary variable, it would be useful to explore its relationship to the other continuous variables.
@@ -200,7 +216,8 @@ The boxplot of the sample distribution of height by the price category shows tha
 ```{r, fig.align='center', out.width="60%"}
 ggplot(ikeadata,
        mapping = aes(x = priceMoreThan1000, y = height)) + 
-  geom_boxplot()
+  geom_boxplot() + 
+  labs(x = "Price over 1000 SAR")
 ```
 
 
@@ -209,7 +226,8 @@ The boxplot of depth by price category presents similar results. Items that cost
 ```{r, fig.align='center', out.width="60%"}
 ggplot(ikeadata,
        mapping = aes(x = priceMoreThan1000, y = depth)) + 
-  geom_boxplot()
+  geom_boxplot() +
+  labs(x = "Price over 1000 SAR")
 ```
 
 
@@ -218,5 +236,6 @@ Finally, we observe the largest separation in medians for the variable of width.
 ```{r, fig.align='center', out.width="60%"}
 ggplot(ikeadata,
        mapping = aes(x = priceMoreThan1000, y = width)) + 
-  geom_boxplot()
+  geom_boxplot() + 
+  labs(x = "Price over 1000 SAR")
 ```
