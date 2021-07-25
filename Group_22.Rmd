@@ -45,7 +45,7 @@ ikeadata <- read.csv("./dataset22.csv", row.names = 1)
 ikeadata$priceMoreThan1000 <- ikeadata$price > 1000
 ```
 
-Throughout the report, we consider various numerical and graphical summaries, followed by the use of an appropriate generalised linear model in order to assess the relationship between the available variables and the 1000 Suadi Riyals threshold related to the price.
+Throughout the report, we consider various numerical and graphical summaries, followed by the use of an appropriate generalised linear model in order to assess the relationship between the available variables and the 1000 Suadi Riyals threshold related to the price(Osborne,2017).
 
 
 
@@ -246,7 +246,7 @@ ggplot(ikeadata,
 In this part, we will try to build the model, and make variable selection and model comparison. So as to establish a final model, and study the correlation between the variables and whether the price is higher than 1000.
 
 ## Variable Selection
-At the beginning, we will add all variables except "sellable_online" to the model. The model will be as follows:
+At the beginning, we will add all variables except "sellable_online" to the model(Tutz,2012). The model will be as follows:
 $$ \ln\left(\frac{p}{1-p}\right) = \alpha + \beta_0 \cdot \textrm{depth}+ \beta_1 \cdot \textrm{height}+ \beta_2 \cdot \textrm{width}+ \beta_3 \cdot \mathbb{I}_{other\_colors}(x)$$
 where $p$ is the binary response variable which indicate the probability that the price is greater than 1000. 
 $\mathbb{I}_{other\_colors}$ is an indicator variable such that
@@ -265,13 +265,13 @@ model1 <- glm(priceMoreThan1000 ~ depth+height+width+other_colors, data = ikeada
 confint(model1) %>%
   kable(caption = "\\label{tab:Confidence Interval} The Confidence Intervals of all parameters")
 ```
-It can be seen that except for the variable "other_colors", all confidence intervals do not include 0. Therefore, "other_colors" cannot be considered significant. The high p-value can double-check the result.
+It can be seen that except for the variable "other_colors", all confidence intervals do not include 0. Therefore, "other_colors" cannot be considered significant. The high p-value can double-check the result(Dippold and Hruschka, 2013).
 ```{r}
 summary(model1) %>%
 coefficients %>%
 kable(caption = "coefficients of model1")
 ```
-Therefore we decided to remove the variable "other_colors" and choose some of the remaining variables to buld the model. They are depth, height and width of each item in our dataset. In order to determine whether there are still variables that need to be removed, we compare AIC and BIC parameters to determine.
+Therefore we decided to remove the variable "other_colors" and choose some of the remaining variables to build the model. They are depth, height and width of each item in our dataset. In order to determine whether there are still variables that need to be removed, we compare AIC and BIC parameters to determine.
 ```{r}
 model2 <- glm(priceMoreThan1000 ~ depth+height+width, data = ikeadata, 
              family = binomial(link = "logit"))
@@ -354,4 +354,10 @@ The results show that the price of furniture sold by IKEA is related to the size
 * Is there any other algorithm as link function
 * Is it possible to integrate category and reduce the number of categories so that it can be used as a variable in the model?
 
+# Refference
 
+[1]Osborne, J. (2017). Regression & linear modeling. SAGE Publications, Inc https://www-doi-org.ezproxy.lib.gla.ac.uk/10.4135/9781071802724​
+
+[2] Tutz, G. (2012). Regression for categorical data. Cambridge University Press.​
+
+[3] Dippold, K., Hruschka, H. Variable selection for market basket analysis. Comput Stat 28, 519–539 (2013). https://doi-org.ezproxy.lib.gla.ac.uk/10.1007/s00180-012-0315-3
