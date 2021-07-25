@@ -9,11 +9,11 @@ output:
 fig_caption: yes
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include=FALSE,warning = FALSE}
 knitr::opts_chunk$set(echo = FALSE, message = FALSE)
 ```
 
-```{r libraries}
+```{r libraries,warning = FALSE}
 library(moderndive)
 library(knitr)
 library(tidyverse)
@@ -37,7 +37,7 @@ The objective of this report is to identify the most influential attributes that
 
 More specifically, we are interested in discovering the most important features out of all available that dictate whether a product is more expensive than 1000 Saudi Riyals. For that reason, we create one more binary variable, `priceMoreThan1000`, to indicate whether a product costs more than 1000 Saudi Riyals.
 
-```{r}
+```{r,warning = FALSE}
 # reading data
 ikeadata <- read.csv("./dataset22.csv", row.names = 1)
 
@@ -53,7 +53,7 @@ Throughout the report, we consider various numerical and graphical summaries, fo
 
 Before conducting any formal data analysis using statistical models, it is useful to explore our data and the relationships between them using numerical and graphical summaries. The following table contains summary statistics for the variables of our data set except for the `item_id` variable as it constitutes an identification variable that does not hold any useful information about the products.
 
-```{r}
+```{r,warning = FALSE}
 ikeadata$item_id <- NULL
 ikeadata$category <- as.factor(ikeadata$category)
 ikeadata$other_colors <- ikeadata$other_colors == "Yes"
@@ -90,7 +90,7 @@ Our first step is to remove observations with 2 or more missing values. Such obs
 
 Additionally, in order to avoid removing more information from the data set, we attempt to replace the missing values of the remaining observations. To this end, we calculate the mean of the missing variable using only those observations that belong to the same furniture category as the observation of interest. Essentially, this is equivalent to fitting a linear regression model with the variable of interest as the response and the `category` variable as the predictor and predicting the missing value using the observation's furniture category.
 
-```{r}
+```{r,warning = FALSE}
 # removing observations with >= 2 NAs
 ikeadata <- ikeadata[!apply(is.na(ikeadata), 1, sum) >= 2,]
 
@@ -136,7 +136,7 @@ First, we focus on the relationship between the `sellable_online` binary variabl
 
 However, from the barplot of counts along with our findings from the summary statistics it is shown that the amount of products not available for online purchase are just three in our data set. That's an extremely small amount of data as 99% or 380 of the products are indeed available for online purchase. In other words, we do not have a sufficient sample of products that are _unavailable_ online in order to analyse the sample distribution of the price category for them. Therefore, under these data, we consider the `sellable_online` variable not significant for the analysis as all but 3 products are available online. It is important to point out that this issue was also present prior to cleaning the data as the original data set contained only 8 observations with `sellable_online` equal to `FALSE` out of 500 products in total.
 
-```{r}
+```{r,warning = FALSE}
 # table of percentages of price category for each sellable_online category
 soVsPrice <- t(apply(table(ikeadata$sellable_online, ikeadata$priceMoreThan1000), 1, function(x){x/sum(x)}))
 
